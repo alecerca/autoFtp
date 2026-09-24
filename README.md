@@ -29,6 +29,11 @@ Este es un "WinSCP automático": eliges el archivo, indicas la hora/regla y la I
 2. En la web: configura el FTP, explora el destino, define la extensión y activa la automatización.
 3. Para que quede ejecutándose sin abrir la consola, crea una tarea en el *Programador de tareas de Windows* apuntando a `start.bat` (o a `run_headless.bat` si lo añades).
 
+## Extra
+
+- **Idiomas**: español e inglés, con botón de cambio en la cabecera (se recuerda tu elección).
+- **Tema claro/oscuro**: botón en la cabecera; por defecto sigue al sistema.
+
 ## Estructura
 
 ```

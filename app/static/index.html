@@ -9,75 +9,86 @@
 <body>
   <header>
     <h1>autoftp</h1>
-    <span class="tagline">Envía tus archivos por FTP sin esfuerzo</span>
+    <span class="tagline" data-i18n="tagline">Envía tus archivos por FTP sin esfuerzo</span>
+    <button id="lang-toggle" class="lang-btn">EN</button>
+    <button id="theme-toggle" class="lang-btn" title="tema">🌙</button>
     <div id="conn-status" class="status-chip">conectando…</div>
   </header>
 
   <main>
     <section class="panel" id="panel-ftp">
-      <h2>¿A dónde enviamos?</h2>
-      <p class="hint">Los datos del servidor FTP de destino.</p>
+      <h2 data-i18n="panel.ftp.title">¿A dónde enviamos?</h2>
+      <p class="hint" data-i18n="panel.ftp.hint">Los datos del servidor FTP de destino.</p>
       <div class="grid">
-        <label>IP del servidor
-          <input id="ftp-host" placeholder="ej. 192.168.1.100" />
+        <label><span data-i18n="label.host">IP del servidor</span>
+          <input id="ftp-host" data-i18n-placeholder="placeholder.host" placeholder="ej. 192.168.1.100" />
         </label>
-        <label>Puerto
+        <label><span data-i18n="label.port">Puerto</span>
           <input id="ftp-port" type="number" value="21" />
         </label>
-        <label>Usuario
-          <input id="ftp-user" placeholder="tu usuario" />
+        <label><span data-i18n="label.user">Usuario</span>
+          <input id="ftp-user" data-i18n-placeholder="placeholder.user" placeholder="tu usuario" />
         </label>
-        <label>Contraseña
+        <label><span data-i18n="label.password">Contraseña</span>
           <input id="ftp-pass" type="password" placeholder="********" />
         </label>
       </div>
       <div class="row">
-        <button id="btn-connect">Probar conexión</button>
-        <button id="btn-save-config" class="primary">Guardar</button>
+        <button id="btn-connect" data-i18n="btn.testConnection">Probar conexión</button>
+        <button id="btn-save-config" class="primary" data-i18n="btn.save">Guardar</button>
       </div>
     </section>
 
     <section class="panel" id="panel-browse">
-      <h2>Carpeta de destino en el servidor</h2>
-      <p class="hint">Navega y elige dónde se guardarán los archivos subidos.</p>
+      <h2 data-i18n="panel.browse.title">Carpeta de destino en el servidor</h2>
+      <p class="hint" data-i18n="panel.browse.hint">Navega y elige dónde se guardarán los archivos subidos.</p>
       <div class="breadcrumb" id="breadcrumb"></div>
       <div class="table-wrap">
         <table id="remote-table">
           <thead>
-            <tr><th>Nombre</th><th>Tamaño</th><th></th></tr>
+            <tr>
+              <th data-i18n="table.name">Nombre</th>
+              <th data-i18n="table.size">Tamaño</th>
+              <th></th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
         <div id="remote-progress" class="progress hidden"><div class="bar"></div></div>
       </div>
       <div class="row">
-        <button id="btn-new-folder">Crear carpeta</button>
-        <button id="btn-use-folder" class="primary">Usar esta carpeta</button>
+        <button id="btn-new-folder" data-i18n="btn.createFolder">Crear carpeta</button>
+        <button id="btn-use-folder" class="primary" data-i18n="btn.useFolder">Usar esta carpeta</button>
       </div>
     </section>
 
     <section class="panel" id="panel-local">
-      <h2>Qué archivos enviamos</h2>
-      <p class="hint">La carpeta que vigilamos y los tipos de archivo. Tip: usa una carpeta propia (ej. <b>C:\Users\...\Downloads\autoftp</b>) y mete ahí solo lo que quieras enviar, así no se cuelan cosas.</p>
+      <h2 data-i18n="panel.local.title">Qué archivos enviamos</h2>
+      <p class="hint" data-i18n="panel.local.hint" data-i18n-html>La carpeta que vigilamos y los tipos de archivo. Tip: usa una carpeta propia (ej. <b>C:\Users\...\Downloads\autoftp</b>) y mete ahí solo lo que quieras enviar, así no se cuelan cosas.</p>
       <div class="grid">
-        <label class="wide">Carpeta local
+        <label class="wide">
+          <span data-i18n="label.localFolder">Carpeta local</span>
           <input id="local-folder" placeholder="C:\Users\...\Downloads\autoftp" />
         </label>
       </div>
       <div class="grid">
         <label class="wide">
-          Extensiones de archivo
+          <span data-i18n="label.extensions">Extensiones de archivo</span>
           <div id="ext-list"></div>
         </label>
       </div>
       <div class="row">
-        <button id="btn-use-downloads">Usar carpeta de Descargas</button>
-        <button id="btn-refresh-local">Ver archivos</button>
+        <button id="btn-use-downloads" data-i18n="btn.useDownloads">Usar carpeta de Descargas</button>
+        <button id="btn-refresh-local" data-i18n="btn.viewFiles">Ver archivos</button>
       </div>
       <div class="table-wrap">
         <table id="local-table">
           <thead>
-            <tr><th>Archivo</th><th>Tamaño</th><th>Subido</th></tr>
+            <tr>
+              <th data-i18n="table.file">Archivo</th>
+              <th data-i18n="table.size">Tamaño</th>
+              <th data-i18n="table.uploaded">Subido</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -85,42 +96,43 @@
     </section>
 
     <section class="panel" id="panel-auto">
-      <h2>¿Cuándo se envía?</h2>
+      <h2 data-i18n="panel.auto.title">¿Cuándo se envía?</h2>
       <div class="row">
         <label class="switch">
           <input type="checkbox" id="auto-enabled" />
-          <span>Enviar al aparecer el archivo</span>
+          <span data-i18n="switch.auto">Enviar al aparecer el archivo</span>
         </label>
-        <label>Revisar cada (seg)
+        <label><span data-i18n="label.checkEvery">Revisar cada (seg)</span>
           <input id="auto-interval" type="number" value="10" min="2" style="width:90px" />
         </label>
       </div>
       <div class="row">
         <label class="switch">
           <input type="checkbox" id="sched-enabled" />
-          <span>Enviar a una hora fija</span>
+          <span data-i18n="switch.sched">Enviar a una hora fija</span>
         </label>
-        <label>Hora
+        <label><span data-i18n="label.time">Hora</span>
           <input id="sched-time" type="time" value="20:00" />
         </label>
       </div>
       <div class="row">
-        <button id="btn-scan-now">Enviar ahora</button>
+        <button id="btn-scan-now" data-i18n="btn.sendNow">Enviar ahora</button>
       </div>
       <p id="auto-note" class="hint"></p>
     </section>
 
     <section class="panel" id="panel-logs">
-      <h2>Actividad</h2>
-      <p class="hint">Qué se ha enviado y cuándo.</p>
+      <h2 data-i18n="panel.logs.title">Actividad</h2>
+      <p class="hint" data-i18n="panel.logs.hint">Qué se ha enviado y cuándo.</p>
       <div id="logs"></div>
     </section>
   </main>
 
   <footer>
-    <span>autoftp · servidor local en <code>http://localhost:8123</code></span>
+    <span>autoftp · <span data-i18n="footer.suffix">servidor local en</span> <code>http://localhost:8123</code></span>
   </footer>
 
+  <script src="/static/i18n.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

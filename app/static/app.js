@@ -26,14 +26,47 @@ function human(bytes) {
   return bytes.toFixed(1) + " " + units[i];
 }
 
-function setStatus(text, kind) {
+function setStatus(text, kind, key) {
   const el = $("#conn-status");
   el.textContent = text;
   el.className = "status-chip" + (kind ? " " + kind : "");
+  if (key) el.dataset.i18nKey = key;
+  else delete el.dataset.i18nKey;
 }
 
 function toastError(msg) {
   alert(msg);
+}
+
+/* ---------- theme ---------- */
+function initTheme() {
+  let saved = null;
+  try {
+    saved = localStorage.getItem("autoftp.theme");
+  } catch (e) { /* ignore */ }
+  const prefersDark = window.matchMedia
+    ? window.matchMedia("(prefers-color-scheme: dark)").matches
+    : false;
+  const theme = saved || (prefersDark ? "dark" : "light");
+  applyTheme(theme);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  $("#theme-toggle").textContent = theme === "dark" ? "☀️" : "🌙";
+  try {
+    localStorage.setItem("autoftp.theme", theme);
+  } catch (e) { /* ignore */ }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  applyTheme(current === "dark" ? "light" : "dark");
+}
+
+/* ---------- i18n ---------- */
+function initLanguage() {
+  initLang();
 }
 
 /* ---------- config ---------- */
@@ -94,14 +127,14 @@ function addExtInput(ext) {
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.textContent = "+";
-  addBtn.title = "Añadir otra extensión";
+  addBtn.title = t("ext.add");
   addBtn.onclick = () => addExtInput("");
   row.appendChild(addBtn);
   if (document.querySelectorAll(".ext-input").length > 0) {
     const delBtn = document.createElement("button");
     delBtn.type = "button";
     delBtn.textContent = "×";
-    delBtn.title = "Quitar extensión";
+    delBtn.title = t("ext.remove");
     delBtn.onclick = () => {
       row.remove();
       updateAutoNote();
@@ -114,7 +147,7 @@ function addExtInput(ext) {
 
 async function saveConfig() {
   config = await api("/api/config", "POST", collectConfig());
-  setStatus("configuración guardada", "ok");
+  setStatus(t("status.saved"), "ok", "status.saved");
 }
 
 function updateAutoNote() {
@@ -122,16 +155,19 @@ function updateAutoNote() {
   const exts = $$(".ext-input").map((i) => i.value.trim()).filter(Boolean);
   if ($("#auto-enabled").checked) {
     parts.push(
-      `vigilando ${exts.join(", ") || ".zip"} cada ` +
-        `${$("#auto-interval").value || 10}s → ${remotePath}`
+      t("note.activeWatching", {
+        exts: exts.join(", ") || ".zip",
+        n: $("#auto-interval").value || 10,
+        path: remotePath,
+      })
     );
   }
   if ($("#sched-enabled").checked) {
-    parts.push(`subida fija a las ${$("#sched-time").value}`);
+    parts.push(t("note.activeSchedule", { time: $("#sched-time").value }));
   }
   $("#auto-note").textContent = parts.length
-    ? "Activo: " + parts.join(" · ")
-    : "Sin automatización activa.";
+    ? t("note.activePrefix") + parts.join(" · ")
+    : t("note.none");
 }
 
 /* ---------- remote browser ---------- */
@@ -168,17 +204,17 @@ async function connectAndBrowse() {
     username: $("#ftp-user").value.trim(),
     password: $("#ftp-pass").value,
   };
-  setStatus("conectando…");
+  setStatus(t("status.connecting"), null, "status.connecting");
   try {
     const data = await api("/api/ftp/connect", "POST", body);
     remotePath = data.pwd || "/";
     renderBreadcrumb();
     renderRemote(data.entries);
-    setStatus("conectado a " + body.host, "ok");
+    setStatus(t("status.connectedTo") + body.host, "ok");
   } catch (e) {
-    setStatus("sin conexión", "err");
+    setStatus(t("status.disconnected"), "err", "status.disconnected");
     renderRemote([]);
-    toastError("No se pudo conectar: " + e.message);
+    toastError(t("alert.connectFail", { e: e.message }));
   }
 }
 
@@ -195,9 +231,9 @@ async function navigateTo(path) {
     remotePath = data.pwd || path;
     renderBreadcrumb();
     renderRemote(data.entries);
-    setStatus("conectado", "ok");
+    setStatus(t("status.connected"), "ok", "status.connected");
   } catch (e) {
-    toastError("No se pudo abrir: " + e.message);
+    toastError(t("alert.openFail", { e: e.message }));
   }
 }
 
@@ -205,7 +241,7 @@ function renderRemote(entries) {
   const tbody = $("#remote-table tbody");
   tbody.innerHTML = "";
   if (!entries || !entries.length) {
-    tbody.innerHTML = `<tr><td colspan="3" class="hint">Carpeta vacía</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" class="hint">${t("table.emptyFolder")}</td></tr>`;
     return;
   }
   const dirs = entries.filter((e) => e.is_dir);
@@ -222,7 +258,7 @@ function renderRemote(entries) {
     actions.className = "actions";
     if (entry.is_dir) {
       const btn = document.createElement("button");
-      btn.textContent = "Entrar";
+      btn.textContent = t("table.enter");
       btn.onclick = () => navigateTo(joinPath(remotePath, entry.name));
       actions.appendChild(btn);
     }
@@ -238,19 +274,19 @@ function joinPath(base, name) {
 }
 
 async function newFolder() {
-  const name = prompt("Nombre de la nueva carpeta:");
+  const name = prompt(t("prompt.newFolder"));
   if (!name) return;
   try {
     await api("/api/ftp/mkdir", "POST", { path: joinPath(remotePath, name) });
     navigateTo(remotePath);
   } catch (e) {
-    toastError("No se pudo crear: " + e.message);
+    toastError(t("alert.createFail", { e: e.message }));
   }
 }
 
 function useFolderAsTarget() {
   saveConfig().then(() => {
-    setStatus("destino fijado en " + remotePath, "ok");
+    setStatus(t("status.destSet") + remotePath, "ok");
     updateAutoNote();
   });
 }
@@ -260,17 +296,17 @@ async function refreshLocal() {
   const folder = $("#local-folder").value.trim();
   const extensions = $$(".ext-input").map((i) => i.value.trim()).filter(Boolean);
   const tbody = $("#local-table tbody");
-  tbody.innerHTML = `<tr><td colspan="3" class="hint">Cargando…</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="3" class="hint">${t("table.loading")}</td></tr>`;
   try {
     const data = await api("/api/local/list", "POST", { folder, extensions });
     if (!data.ok) {
-      tbody.innerHTML = `<tr><td colspan="3" class="err-text">${data.error}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3" class="err-text">${escapeHtml(data.error)}</td></tr>`;
       return;
     }
     if (!data.files.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="hint">Sin archivos con esas extensiones (${data.extensions.join(
-        ", "
-      )})</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3" class="hint">${t("table.noFiles", {
+        list: data.extensions.join(", "),
+      })}</td></tr>`;
       return;
     }
     const seen = await api("/api/status").then((s) => s.recent || {});
@@ -279,13 +315,13 @@ async function refreshLocal() {
       const key = Object.keys(seen).find((k) => k.startsWith(f.name + "|"));
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td class="name">📄 ${f.name}</td>
+        <td class="name">📄 ${escapeHtml(f.name)}</td>
         <td>${human(f.size)}</td>
-        <td class="${key ? "ok-text" : ""}">${key ? "sí ✓" : "no"}</td>`;
+        <td class="${key ? "ok-text" : ""}">${key ? escapeHtml(t("table.yes")) : escapeHtml(t("table.no"))}</td>`;
       tbody.appendChild(tr);
     });
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="3" class="err-text">${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" class="err-text">${escapeHtml(e.message)}</td></tr>`;
   }
 }
 
@@ -298,20 +334,20 @@ async function useDownloads() {
 async function scanNow() {
   const btn = $("#btn-scan-now");
   btn.disabled = true;
-  setStatus("subiendo…");
+  setStatus(t("status.uploading"), null, "status.uploading");
   try {
     await saveConfig();
     const data = await api("/api/scan", "POST", { force: false });
     if (data.status === "error") {
-      setStatus("error en la subida", "err");
+      setStatus(t("status.uploadError"), "err", "status.uploadError");
     } else if (data.results && data.results.length) {
-      setStatus(`subidos ${data.results.length} archivo(s)`, "ok");
+      setStatus(t("status.uploadedCount", { n: data.results.length }), "ok");
     } else {
-      setStatus("nada nuevo que subir", "");
+      setStatus(t("status.nothingNew"), null, "status.nothingNew");
     }
     refreshLocal();
   } catch (e) {
-    setStatus("error", "err");
+    setStatus(t("status.uploadError"), "err", "status.uploadError");
     toastError(e.message);
   } finally {
     btn.disabled = false;
@@ -345,7 +381,7 @@ async function pollLogs() {
       logs.slice(logIndex).forEach(renderLog);
       logIndex = logs.length;
     }
-    if (data.running) setStatus("sistema activo", "ok");
+    if (data.running) setStatus(t("status.systemActive"), "ok", "status.systemActive");
   } catch (e) {
     /* ignore */
   }
@@ -354,19 +390,22 @@ async function pollLogs() {
 /* ---------- init ---------- */
 function bind() {
   $("#btn-connect").onclick = connectAndBrowse;
-  $("#btn-save-config").onclick = () => saveConfig().then(() => setStatus("guardado", "ok"));
+  $("#btn-save-config").onclick = () => saveConfig().then(() => setStatus(t("status.saveShort"), "ok", "status.saveShort"));
   $("#btn-new-folder").onclick = newFolder;
   $("#btn-use-folder").onclick = useFolderAsTarget;
   $("#btn-use-downloads").onclick = useDownloads;
   $("#btn-refresh-local").onclick = refreshLocal;
   $("#btn-scan-now").onclick = scanNow;
+  $("#theme-toggle").onclick = toggleTheme;
   ["auto-enabled", "auto-interval", "sched-enabled", "sched-time"].forEach((id) => {
     $("#" + id).addEventListener("change", updateAutoNote);
   });
 }
 
 async function init() {
+  initTheme();
   bind();
+  initLanguage();
   renderBreadcrumb();
   await loadConfig();
   await refreshLocal();
