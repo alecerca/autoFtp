@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>autoftp</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>autoftp</h1>
+    <span class="tagline">Monitor de carpeta + subida FTP automática</span>
+    <div id="conn-status" class="status-chip">conectando…</div>
+  </header>
+
+  <main>
+    <section class="panel" id="panel-ftp">
+      <h2>Destino FTP</h2>
+      <div class="grid">
+        <label>IP / host
+          <input id="ftp-host" placeholder="192.168.1.100" />
+        </label>
+        <label>Puerto
+          <input id="ftp-port" type="number" value="21" />
+        </label>
+        <label>Usuario
+          <input id="ftp-user" placeholder="usuario" />
+        </label>
+        <label>Contraseña
+          <input id="ftp-pass" type="password" placeholder="••••••••" />
+        </label>
+      </div>
+      <div class="row">
+        <button id="btn-connect">Probar conexión</button>
+        <button id="btn-save-config" class="primary">Guardar configuración</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-browse">
+      <h2>Carpeta de destino (en el servidor)</h2>
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <div class="table-wrap">
+        <table id="remote-table">
+          <thead>
+            <tr><th>Nombre</th><th>Tamaño</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="remote-progress" class="progress hidden"><div class="bar"></div></div>
+      </div>
+      <div class="row">
+        <button id="btn-new-folder">Nueva carpeta</button>
+        <button id="btn-use-folder" class="primary">Usar esta carpeta como destino</button>
+      </div>
+      <div id="current-remote" class="hint">Destino por defecto: /</div>
+    </section>
+
+    <section class="panel" id="panel-local">
+      <h2>Carpeta local a vigilar</h2>
+      <div class="grid">
+        <label class="wide">Ruta local
+          <input id="local-folder" placeholder="C:\Users\...\Downloads" />
+        </label>
+        <label>Extensión a detectar
+          <input id="local-ext" placeholder=".zip" />
+        </label>
+      </div>
+      <div class="row">
+        <button id="btn-use-downloads">Usar carpeta Descargas</button>
+        <button id="btn-refresh-local" class="primary">Ver archivos</button>
+      </div>
+      <div class="table-wrap">
+        <table id="local-table">
+          <thead>
+            <tr><th>Archivo</th><th>Tamaño</th><th>Subido</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-auto">
+      <h2>Automatización</h2>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="auto-enabled" />
+          <span>Subir automáticamente cuando aparezca el archivo</span>
+        </label>
+        <label>Intervalo (seg)
+          <input id="auto-interval" type="number" value="10" min="2" style="width:90px" />
+        </label>
+      </div>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="sched-enabled" />
+          <span>Subida programada a una hora fija</span>
+        </label>
+        <label>Hora
+          <input id="sched-time" type="time" value="20:00" />
+        </label>
+      </div>
+      <div class="row">
+        <button id="btn-scan-now">Subir ahora (manual)</button>
+        <button id="btn-scan-force" class="primary">Subir ahora (aunque ya se subió)</button>
+      </div>
+      <p id="auto-note" class="hint"></p>
+    </section>
+
+    <section class="panel" id="panel-logs">
+      <h2>Registro de actividad</h2>
+      <div id="logs"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>autoftp · servidor local en <code>http://localhost:8123</code></span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
