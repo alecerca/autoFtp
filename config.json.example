@@ -1,15 +1,15 @@
 {
   "ftp": {
-    "host": "192.168.1.100",
+    "host": "",
     "port": 21,
-    "username": "anonymous",
+    "username": "",
     "password": "",
     "remote_dir": "/"
   },
   "auto_upload": {
     "enabled": true,
     "extension": ".zip",
-    "folder": "/home/sanchiro/Downloads",
+    "folder": "",
     "interval_seconds": 10
   },
   "schedule": {

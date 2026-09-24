@@ -9,9 +9,9 @@ STATE_PATH = BASE_DIR / "state.json"
 
 DEFAULT_CONFIG = {
     "ftp": {
-        "host": "192.168.1.100",
+        "host": "",
         "port": 21,
-        "username": "anonymous",
+        "username": "",
         "password": "",
         "remote_dir": "/",
     },

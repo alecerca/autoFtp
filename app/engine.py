@@ -12,7 +12,7 @@ def build_client(cfg):
     return FtpClient(
         host=ftp.get("host", ""),
         port=ftp.get("port", 21),
-        username=ftp.get("username", "anonymous"),
+        username=ftp.get("username", ""),
         password=ftp.get("password", ""),
     )
 

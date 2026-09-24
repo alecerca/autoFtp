@@ -28,7 +28,7 @@ def _client_from_config(cfg=None):
     return FtpClient(
         host=ftp_cfg.get("host", ""),
         port=ftp_cfg.get("port", 21),
-        username=ftp_cfg.get("username", "anonymous"),
+        username=ftp_cfg.get("username", ""),
         password=ftp_cfg.get("password", ""),
     )
 
@@ -66,7 +66,7 @@ async def ftp_connect(request: Request):
     client = FtpClient(
         host=body.get("host", ""),
         port=body.get("port", 21),
-        username=body.get("username", "anonymous"),
+        username=body.get("username", ""),
         password=body.get("password", ""),
     )
     try:
