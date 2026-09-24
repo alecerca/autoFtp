@@ -9,35 +9,37 @@
 <body>
   <header>
     <h1>autoftp</h1>
-    <span class="tagline">Monitor de carpeta + subida FTP automática</span>
+    <span class="tagline">Envía tus archivos por FTP sin esfuerzo</span>
     <div id="conn-status" class="status-chip">conectando…</div>
   </header>
 
   <main>
     <section class="panel" id="panel-ftp">
-      <h2>Destino FTP</h2>
+      <h2>¿A dónde enviamos?</h2>
+      <p class="hint">Los datos del servidor FTP de destino.</p>
       <div class="grid">
-        <label>IP / host
-          <input id="ftp-host" placeholder="192.168.1.100" />
+        <label>IP del servidor
+          <input id="ftp-host" placeholder="ej. 192.168.1.100" />
         </label>
         <label>Puerto
           <input id="ftp-port" type="number" value="21" />
         </label>
         <label>Usuario
-          <input id="ftp-user" placeholder="usuario" />
+          <input id="ftp-user" placeholder="tu usuario" />
         </label>
         <label>Contraseña
-          <input id="ftp-pass" type="password" placeholder="••••••••" />
+          <input id="ftp-pass" type="password" placeholder="********" />
         </label>
       </div>
       <div class="row">
         <button id="btn-connect">Probar conexión</button>
-        <button id="btn-save-config" class="primary">Guardar configuración</button>
+        <button id="btn-save-config" class="primary">Guardar</button>
       </div>
     </section>
 
     <section class="panel" id="panel-browse">
-      <h2>Carpeta de destino (en el servidor)</h2>
+      <h2>Carpeta de destino en el servidor</h2>
+      <p class="hint">Navega y elige dónde se guardarán los archivos subidos.</p>
       <div class="breadcrumb" id="breadcrumb"></div>
       <div class="table-wrap">
         <table id="remote-table">
@@ -49,25 +51,28 @@
         <div id="remote-progress" class="progress hidden"><div class="bar"></div></div>
       </div>
       <div class="row">
-        <button id="btn-new-folder">Nueva carpeta</button>
-        <button id="btn-use-folder" class="primary">Usar esta carpeta como destino</button>
+        <button id="btn-new-folder">Crear carpeta</button>
+        <button id="btn-use-folder" class="primary">Usar esta carpeta</button>
       </div>
-      <div id="current-remote" class="hint">Destino por defecto: /</div>
     </section>
 
     <section class="panel" id="panel-local">
-      <h2>Carpeta local a vigilar</h2>
+      <h2>Qué archivos enviamos</h2>
+      <p class="hint">La carpeta que vigilamos y los tipos de archivo. Tip: usa una carpeta propia (ej. <b>C:\Users\...\Downloads\autoftp</b>) y mete ahí solo lo que quieras enviar, así no se cuelan cosas.</p>
       <div class="grid">
-        <label class="wide">Ruta local
-          <input id="local-folder" placeholder="C:\Users\...\Downloads" />
+        <label class="wide">Carpeta local
+          <input id="local-folder" placeholder="C:\Users\...\Downloads\autoftp" />
         </label>
-        <label>Extensión a detectar
-          <input id="local-ext" placeholder=".zip" />
+      </div>
+      <div class="grid">
+        <label class="wide">
+          Extensiones de archivo
+          <div id="ext-list"></div>
         </label>
       </div>
       <div class="row">
-        <button id="btn-use-downloads">Usar carpeta Descargas</button>
-        <button id="btn-refresh-local" class="primary">Ver archivos</button>
+        <button id="btn-use-downloads">Usar carpeta de Descargas</button>
+        <button id="btn-refresh-local">Ver archivos</button>
       </div>
       <div class="table-wrap">
         <table id="local-table">
@@ -80,34 +85,34 @@
     </section>
 
     <section class="panel" id="panel-auto">
-      <h2>Automatización</h2>
+      <h2>¿Cuándo se envía?</h2>
       <div class="row">
         <label class="switch">
           <input type="checkbox" id="auto-enabled" />
-          <span>Subir automáticamente cuando aparezca el archivo</span>
+          <span>Enviar al aparecer el archivo</span>
         </label>
-        <label>Intervalo (seg)
+        <label>Revisar cada (seg)
           <input id="auto-interval" type="number" value="10" min="2" style="width:90px" />
         </label>
       </div>
       <div class="row">
         <label class="switch">
           <input type="checkbox" id="sched-enabled" />
-          <span>Subida programada a una hora fija</span>
+          <span>Enviar a una hora fija</span>
         </label>
         <label>Hora
           <input id="sched-time" type="time" value="20:00" />
         </label>
       </div>
       <div class="row">
-        <button id="btn-scan-now">Subir ahora (manual)</button>
-        <button id="btn-scan-force" class="primary">Subir ahora (aunque ya se subió)</button>
+        <button id="btn-scan-now">Enviar ahora</button>
       </div>
       <p id="auto-note" class="hint"></p>
     </section>
 
     <section class="panel" id="panel-logs">
-      <h2>Registro de actividad</h2>
+      <h2>Actividad</h2>
+      <p class="hint">Qué se ha enviado y cuándo.</p>
       <div id="logs"></div>
     </section>
   </main>

@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
     },
     "auto_upload": {
         "enabled": True,
-        "extension": ".zip",
+        "extensions": [".zip"],
         "folder": "",
         "interval_seconds": 10,
     },
@@ -48,10 +48,18 @@ def load_config() -> dict:
         data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
         merged = json.loads(json.dumps(DEFAULT_CONFIG))
         merged.update(data)
-        return merged
+        return _migrate(merged)
     cfg = json.loads(json.dumps(DEFAULT_CONFIG))
     cfg["auto_upload"]["folder"] = default_downloads_folder()
     save_config(cfg)
+    return cfg
+
+
+def _migrate(cfg: dict) -> dict:
+    auto = cfg.setdefault("auto_upload", {})
+    if "extension" in auto and "extensions" not in auto:
+        auto["extensions"] = [auto.pop("extension")]
+    auto["extensions"] = normalize_extensions(auto.get("extensions", [".zip"]))
     return cfg
 
 
@@ -77,3 +85,14 @@ def normalize_extension(ext: str) -> str:
     if not ext.startswith("."):
         ext = "." + ext
     return ext
+
+
+def normalize_extensions(exts) -> list:
+    if isinstance(exts, str):
+        exts = [exts]
+    result = []
+    for ext in exts or []:
+        norm = normalize_extension(str(ext))
+        if norm and norm not in result:
+            result.append(norm)
+    return result or [".zip"]

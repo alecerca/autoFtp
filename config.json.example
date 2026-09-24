@@ -8,7 +8,7 @@
   },
   "auto_upload": {
     "enabled": true,
-    "extension": ".zip",
+    "extensions": [".zip", ".exe"],
     "folder": "",
     "interval_seconds": 10
   },

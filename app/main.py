@@ -10,7 +10,7 @@ from .config import (
     BASE_DIR,
     load_config,
     load_state,
-    normalize_extension,
+    normalize_extensions,
     save_config,
 )
 from .engine import Engine
@@ -114,14 +114,13 @@ async def ftp_mkdir(request: Request):
 async def local_list(request: Request):
     body = await request.json()
     folder = body.get("folder") or ""
-    ext = body.get("extension") or ".zip"
+    exts = normalize_extensions(body.get("extensions") or [".zip"])
     if not os.path.isdir(folder):
         return {"ok": False, "error": f"La carpeta no existe: {folder}", "files": []}
-    norm_ext = normalize_extension(ext)
     files = []
     for name in os.listdir(folder):
         path = os.path.join(folder, name)
-        if os.path.isfile(path) and name.lower().endswith(norm_ext):
+        if os.path.isfile(path) and any(name.lower().endswith(e) for e in exts):
             st = os.stat(path)
             files.append({
                 "name": name,
@@ -129,7 +128,7 @@ async def local_list(request: Request):
                 "mtime": st.st_mtime,
             })
     files.sort(key=lambda f: f["mtime"], reverse=True)
-    return {"ok": True, "folder": folder, "extension": norm_ext, "files": files}
+    return {"ok": True, "folder": folder, "extensions": exts, "files": files}
 
 
 @app.get("/api/downloads")
@@ -172,10 +171,11 @@ async def upload(request: Request):
 async def scan(request: Request):
     body = await request.json()
     force = bool(body.get("force", False))
+    start_idx = len(engine.logs)
     results = engine.scan_and_upload(force=force)
     has_errors = any(
         log["level"] == "error" and "Fallo subiendo" in log["message"]
-        for log in engine.logs[-10:]
+        for log in engine.logs[start_idx:]
     )
     status = "error" if has_errors else ("ok" if results else "idle")
     return {"ok": True, "status": status, "results": results}

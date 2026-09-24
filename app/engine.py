@@ -67,13 +67,13 @@ class Engine:
     def _refresh_config_loop(self):
         pass
 
-    def _each_matching(self, folder, ext):
-        ext = normalize_extension(ext)
+    def _each_matching(self, folder, exts):
+        exts = [normalize_extension(e) for e in (exts or [])]
         if not folder or not os.path.isdir(folder):
             return []
         matches = []
         for name in os.listdir(folder):
-            if name.lower().endswith(ext):
+            if any(name.lower().endswith(e) for e in exts):
                 path = os.path.join(folder, name)
                 if os.path.isfile(path):
                     matches.append(path)
@@ -83,7 +83,7 @@ class Engine:
         cfg = load_config()
         auto = cfg.get("auto_upload", {})
         folder = auto.get("folder") or ""
-        ext = auto.get("extension", ".zip")
+        exts = auto.get("extensions", [".zip"])
         ftp_cfg = cfg.get("ftp", {})
         remote_dir = ftp_cfg.get("remote_dir", "/")
 
@@ -94,9 +94,9 @@ class Engine:
         state = load_state()
         seen = state.setdefault("seen", {})
 
-        matches = self._each_matching(folder, ext)
+        matches = self._each_matching(folder, exts)
         if not matches:
-            self.add_log("info", "No hay archivos con la extensión seleccionada.")
+            self.add_log("info", "No hay archivos con las extensiones seleccionadas.")
             return []
 
         results = []

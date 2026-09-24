@@ -6,10 +6,12 @@ Herramienta de escritorio (interfaz web local) para **Windows** que vigila una c
 
 1. Eliges una **IP / servidor FTP** destino, usuario y contraseña.
 2. Navegas por el árbol de directorios del servidor y pulsas "Usar esta carpeta como destino".
-3. Configuras la **carpeta local** (Descargas por defecto) y la **extensión** a vigilar (`.zip`, etc.).
+3. Configuras la **carpeta local** y las **extensiones** a vigilar (`.zip`, `.exe`, las que quieras; puedes añadir varias con el botón `+`).
 4. Activas:
-   - **Subida automática**: en cuanto aparezca un archivo con esa extensión, se sube solo.
-   - **Subida programada**: a una hora fija del día se suben los archivos nuevos.
+   - **Subida automática**: en cuanto aparezca un archivo con alguna de esas extensiones, se sube solo.
+   - **Subida programada**: a una hora fija se envían todos los archivos con esas extensiones.
+
+> **Consejo**: usa una carpeta dedicada (ej. `Descargas\autoftp`) y mete ahí solo lo que quieras enviar. Así no se cuelan descargas que no planeaste.
 
 Este es un "WinSCP automático": eliges el archivo, indicas la hora/regla y la IP+ruta destino, y se copia solo.
 

@@ -44,7 +44,7 @@ async function loadConfig() {
   $("#ftp-user").value = config.ftp.username || "";
   $("#ftp-pass").value = config.ftp.password || "";
   $("#local-folder").value = config.auto_upload.folder || "";
-  $("#local-ext").value = config.auto_upload.extension || ".zip";
+  renderExtInputs(config.auto_upload.extensions || [".zip"]);
   $("#auto-enabled").checked = !!config.auto_upload.enabled;
   $("#auto-interval").value = config.auto_upload.interval_seconds || 10;
   $("#sched-enabled").checked = !!config.schedule.enabled;
@@ -64,7 +64,7 @@ function collectConfig() {
     },
     auto_upload: {
       enabled: $("#auto-enabled").checked,
-      extension: $("#local-ext").value.trim() || ".zip",
+      extensions: $$(".ext-input").map((i) => i.value.trim()).filter(Boolean),
       folder: $("#local-folder").value.trim(),
       interval_seconds: parseInt($("#auto-interval").value, 10) || 10,
     },
@@ -76,6 +76,42 @@ function collectConfig() {
   };
 }
 
+function renderExtInputs(exts) {
+  const list = $("#ext-list");
+  list.innerHTML = "";
+  (exts.length ? exts : [".zip"]).forEach((ext) => addExtInput(ext));
+}
+
+function addExtInput(ext) {
+  const list = $("#ext-list");
+  const row = document.createElement("div");
+  row.className = "ext-row";
+  const input = document.createElement("input");
+  input.className = "ext-input";
+  input.placeholder = ".zip";
+  input.value = ext || "";
+  row.appendChild(input);
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.textContent = "+";
+  addBtn.title = "Añadir otra extensión";
+  addBtn.onclick = () => addExtInput("");
+  row.appendChild(addBtn);
+  if (document.querySelectorAll(".ext-input").length > 0) {
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.textContent = "×";
+    delBtn.title = "Quitar extensión";
+    delBtn.onclick = () => {
+      row.remove();
+      updateAutoNote();
+    };
+    row.appendChild(delBtn);
+  }
+  list.appendChild(row);
+  input.addEventListener("input", updateAutoNote);
+}
+
 async function saveConfig() {
   config = await api("/api/config", "POST", collectConfig());
   setStatus("configuración guardada", "ok");
@@ -83,9 +119,10 @@ async function saveConfig() {
 
 function updateAutoNote() {
   const parts = [];
+  const exts = $$(".ext-input").map((i) => i.value.trim()).filter(Boolean);
   if ($("#auto-enabled").checked) {
     parts.push(
-      `vigilando ${$("#local-ext").value || ".zip"} cada ` +
+      `vigilando ${exts.join(", ") || ".zip"} cada ` +
         `${$("#auto-interval").value || 10}s → ${remotePath}`
     );
   }
@@ -122,7 +159,6 @@ function renderBreadcrumb() {
     c.onclick = () => navigateTo(target);
     bc.appendChild(c);
   });
-  $("#current-remote").textContent = "Destino por defecto: " + remotePath;
 }
 
 async function connectAndBrowse() {
@@ -222,17 +258,19 @@ function useFolderAsTarget() {
 /* ---------- local folder ---------- */
 async function refreshLocal() {
   const folder = $("#local-folder").value.trim();
-  const extension = $("#local-ext").value.trim() || ".zip";
+  const extensions = $$(".ext-input").map((i) => i.value.trim()).filter(Boolean);
   const tbody = $("#local-table tbody");
   tbody.innerHTML = `<tr><td colspan="3" class="hint">Cargando…</td></tr>`;
   try {
-    const data = await api("/api/local/list", "POST", { folder, extension });
+    const data = await api("/api/local/list", "POST", { folder, extensions });
     if (!data.ok) {
       tbody.innerHTML = `<tr><td colspan="3" class="err-text">${data.error}</td></tr>`;
       return;
     }
     if (!data.files.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="hint">Sin archivos con extensión ${data.extension}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3" class="hint">Sin archivos con esas extensiones (${data.extensions.join(
+        ", "
+      )})</td></tr>`;
       return;
     }
     const seen = await api("/api/status").then((s) => s.recent || {});
@@ -257,13 +295,13 @@ async function useDownloads() {
 }
 
 /* ---------- manual upload / scan ---------- */
-async function scanNow(force) {
-  const btn = force ? $("#btn-scan-force") : $("#btn-scan-now");
+async function scanNow() {
+  const btn = $("#btn-scan-now");
   btn.disabled = true;
   setStatus("subiendo…");
   try {
     await saveConfig();
-    const data = await api("/api/scan", "POST", { force });
+    const data = await api("/api/scan", "POST", { force: false });
     if (data.status === "error") {
       setStatus("error en la subida", "err");
     } else if (data.results && data.results.length) {
@@ -321,13 +359,10 @@ function bind() {
   $("#btn-use-folder").onclick = useFolderAsTarget;
   $("#btn-use-downloads").onclick = useDownloads;
   $("#btn-refresh-local").onclick = refreshLocal;
-  $("#btn-scan-now").onclick = () => scanNow(false);
-  $("#btn-scan-force").onclick = () => scanNow(true);
-  ["auto-enabled", "auto-interval", "sched-enabled", "sched-time", "local-ext"].forEach(
-    (id) => {
-      $("#" + id).addEventListener("change", updateAutoNote);
-    }
-  );
+  $("#btn-scan-now").onclick = scanNow;
+  ["auto-enabled", "auto-interval", "sched-enabled", "sched-time"].forEach((id) => {
+    $("#" + id).addEventListener("change", updateAutoNote);
+  });
 }
 
 async function init() {
