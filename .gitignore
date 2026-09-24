@@ -5,9 +5,9 @@ __pycache__/
 venv/
 *.egg-info/
 
-# ignore local runtime state
+# ignore local runtime state and credentials
 state.json
-config.local.json
+config.json
 *.log
 
 # ignore IDE / OS
